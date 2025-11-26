@@ -3,6 +3,7 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.CloudTrail;
 using Amazon.CDK.AWS.EC2;
+using Amazon.CDK.AWS.IAM;
 
 namespace CdkFoundation
 {
@@ -201,6 +202,17 @@ namespace CdkFoundation
             AssocRt("AssocRtIsoAzA", isoAzA.Ref);
             AssocRt("AssocRtIsoAzB", isoAzB.Ref);
             AssocRt("AssocRtIsoAzC", isoAzC.Ref);
+
+            // IAM Role for AWS Backup
+            var backupRole = new Role(this, "AwsBackupRole", new RoleProps
+            {
+                RoleName = "glt-role-baseline-service-awsbackup-backup-only",
+                AssumedBy = new ServicePrincipal("backup.amazonaws.com"),
+                Description = "Baseline role for AWS Backup service to perform backups"
+            });
+
+            // Attach the baseline backup policy
+            backupRole.AddManagedPolicy(ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSBackupServiceRolePolicyForBackup"));
 
             // Done: VPC, subnets, NACLs, CloudTrail + S3 bucket
         }
